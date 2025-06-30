@@ -25,44 +25,44 @@ export default async (
 	rawArgv: string[]
 ) =>
 	(async () => {
-		intro(bgCyan(black(' aicommits ')));
-		await assertGitRepo();
+		intro(bgCyan(black(' aicommits ')))
+		const gitRepoPath = await assertGitRepo()
 
-		const detectingFiles = spinner();
+		const detectingFiles = spinner()
 
 		if (stageAll) {
 			// This should be equivalent behavior to `git commit --all`
-			await execa('git', ['add', '--update']);
+			await execa('git', ['add', '--update'])
 		}
 
-		detectingFiles.start('Detecting staged files');
-		const staged = await getStagedDiff(excludeFiles);
+		detectingFiles.start('Detecting staged files')
+		const staged = await getStagedDiff(excludeFiles)
 
 		if (!staged) {
-			detectingFiles.stop('Detecting staged files');
+			detectingFiles.stop('Detecting staged files')
 			throw new KnownError(
 				'No staged changes found. Stage your changes manually, or automatically stage all changes with the `--all` flag.'
-			);
+			)
 		}
 
 		detectingFiles.stop(
 			`${getDetectedMessage(staged.files)}:\n${staged.files
 				.map((file) => `     ${file}`)
 				.join('\n')}`
-		);
+		)
 
-		const { env } = process;
+		const { env } = process
 		const config = await getConfig({
 			OPENAI_KEY: env.OPENAI_KEY || env.OPENAI_API_KEY,
 			proxy:
 				env.https_proxy || env.HTTPS_PROXY || env.http_proxy || env.HTTP_PROXY,
 			generate: generate?.toString(),
 			type: commitType?.toString(),
-		});
+		})
 
-		const s = spinner();
-		s.start('The AI is analyzing your changes');
-		let messages: string[];
+		const s = spinner()
+		s.start('The AI is analyzing your changes')
+		let messages: string[]
 		try {
 			messages = await generateCommitMessage(
 				config.OPENAI_KEY,
@@ -73,10 +73,11 @@ export default async (
 				config['max-length'],
 				config.type,
 				config.timeout,
-				config.proxy
-			);
+				config.proxy,
+				gitRepoPath
+			)
 		} finally {
-			s.stop('Changes analyzed');
+			s.stop('Changes analyzed')
 		}
 
 		if (messages.length === 0) {

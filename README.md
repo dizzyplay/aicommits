@@ -51,6 +51,8 @@ npm update -g aicommits
 
 You can call `aicommits` directly to generate a commit message for your staged changes:
 
+This is a test line.
+
 ```sh
 git add <files...>
 aicommits
@@ -254,3 +256,7 @@ Video coming soon where I rebuild it from scratch to show you how to easily buil
 ## Contributing
 
 If you want to help fix a bug or implement a feature in [Issues](https://github.com/Nutlope/aicommits/issues), checkout the [Contribution Guide](CONTRIBUTING.md) to learn how to setup and test the project
+
+This is a test line.
+
+This is a test line.
