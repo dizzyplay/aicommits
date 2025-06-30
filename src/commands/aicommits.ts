@@ -62,9 +62,9 @@ export default async (
 
 		const s = spinner()
 		s.start('The AI is analyzing your changes')
-		let messages: string[]
+		let result: { messages: string[]; prompt: string; };
 		try {
-			messages = await generateCommitMessage(
+			result = await generateCommitMessage(
 				config.OPENAI_KEY,
 				config.model,
 				config.locale,
@@ -75,10 +75,18 @@ export default async (
 				config.timeout,
 				config.proxy,
 				gitRepoPath
-			)
+			);
 		} finally {
 			s.stop('Changes analyzed')
 		}
+
+		const { messages, prompt } = result;
+
+		console.log(`
+${dim('--- Prompt ---')}
+${dim(prompt)}
+${dim('--------------')}
+`);
 
 		if (messages.length === 0) {
 			throw new KnownError('No commit messages were generated. Try again.');

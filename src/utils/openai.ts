@@ -170,11 +170,14 @@ export const generateCommitMessage = async (
 			proxy
 		);
 
-		return deduplicateMessages(
-			completion.choices
-				.filter((choice) => choice.message?.content)
-				.map((choice) => sanitizeMessage(choice.message!.content as string))
-		);
+		return {
+			messages: deduplicateMessages(
+				completion.choices
+					.filter((choice) => choice.message?.content)
+					.map((choice) => sanitizeMessage(choice.message!.content as string))
+			),
+			prompt,
+		};
 	} catch (error) {
 		const errorAsAny = error as any;
 		if (errorAsAny.code === 'ENOTFOUND') {
