@@ -139,8 +139,10 @@ export const generateCommitMessage = async (
 	maxLength: number,
 	type: CommitType,
 	timeout: number,
-	proxy?: string
+	proxy: string | undefined,
+	gitRepoPath: string
 ) => {
+	const prompt = await generatePrompt(locale, maxLength, type, gitRepoPath);
 	try {
 		const completion = await createChatCompletion(
 			apiKey,
@@ -149,7 +151,7 @@ export const generateCommitMessage = async (
 				messages: [
 					{
 						role: 'system',
-						content: generatePrompt(locale, maxLength, type),
+						content: prompt,
 					},
 					{
 						role: 'user',
@@ -168,11 +170,14 @@ export const generateCommitMessage = async (
 			proxy
 		);
 
-		return deduplicateMessages(
-			completion.choices
-				.filter((choice) => choice.message?.content)
-				.map((choice) => sanitizeMessage(choice.message!.content as string))
-		);
+		return {
+			messages: deduplicateMessages(
+				completion.choices
+					.filter((choice) => choice.message?.content)
+					.map((choice) => sanitizeMessage(choice.message!.content as string))
+			),
+			prompt,
+		};
 	} catch (error) {
 		const errorAsAny = error as any;
 		if (errorAsAny.code === 'ENOTFOUND') {
